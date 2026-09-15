@@ -1,0 +1,25 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.coverage
+htmlcov/
+
+# Local settings and data
+.env
+.env.*
+!.env.example
+*.sqlite3
+*.sqlite3-*
+staticfiles/
+django-react-starter.tar
+
+# Frontend
+client/node_modules/
+client/dist/
+*.log
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/

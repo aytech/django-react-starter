@@ -1,0 +1,28 @@
+name: django-react-starter-build
+
+services:
+  web:
+    image: ${DJANGO_REACT_IMAGE:-django-react-starter:latest}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: production
+      args:
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-python:3.14-slim}
+        NODE_IMAGE: ${NODE_IMAGE:-node:22-slim}
+    init: true
+    restart: unless-stopped
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-}
+      DJANGO_SECURE_SSL_REDIRECT: ${DJANGO_SECURE_SSL_REDIRECT:-1}
+      DJANGO_TRUST_PROXY_HEADERS: ${DJANGO_TRUST_PROXY_HEADERS:-0}
+      GUNICORN_CMD_ARGS: ${GUNICORN_CMD_ARGS:---workers=2 --timeout=60}
+    ports:
+      - "127.0.0.1:${APP_PORT:-8000}:8000"
+    volumes:
+      - production_data:/data
+
+volumes:
+  production_data:
