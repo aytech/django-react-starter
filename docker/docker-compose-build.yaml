@@ -1,28 +1,90 @@
 name: django-react-starter-build
 
 services:
-  web:
-    image: ${DJANGO_REACT_IMAGE:-django-react-starter:latest}
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-      target: production
-      args:
-        PYTHON_IMAGE: ${PYTHON_IMAGE:-python:3.14-slim}
-        NODE_IMAGE: ${NODE_IMAGE:-node:22-slim}
-    init: true
-    restart: unless-stopped
-    environment:
-      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-}
-      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
-      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-}
-      DJANGO_SECURE_SSL_REDIRECT: ${DJANGO_SECURE_SSL_REDIRECT:-1}
-      DJANGO_TRUST_PROXY_HEADERS: ${DJANGO_TRUST_PROXY_HEADERS:-0}
-      GUNICORN_CMD_ARGS: ${GUNICORN_CMD_ARGS:---workers=2 --timeout=60}
-    ports:
-      - "127.0.0.1:${APP_PORT:-8000}:8000"
+  init:
+    image: alpine:latest
     volumes:
-      - production_data:/data
+      - shared:/shared
+    command:
+      - sh
+      - -c
+      - |
+          rm -f /shared/node-build-done
+          touch /shared/build-started
+          echo "Build synchronization initialized."
+  node:
+    image: ${NODE_IMAGE:-node:24-bookworm-slim}
+    volumes:
+      - ../client:/app
+      - shared:/shared
+    working_dir: /app
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    command:
+      - sh 
+      - -c
+      - |
+          echo "Starting Node build..."
 
+          npm ci --no-audit --no-fund &&
+          npm run build &&
+          touch /shared/node-build-done
+
+          echo "Node build finished."
+  python:
+    image: ${PYTHON_IMAGE:-python:3.14-slim}
+    volumes:
+      - ..:/app
+      - shared:/shared
+    working_dir: /app
+    environment:
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-}
+      DJANGO_SETTINGS_MODULE: config.settings.production
+      PATH: "/opt/venv/bin:$PATH"
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    command: 
+      - sh
+      - -c
+      - |
+          DEBIAN_FRONTEND=noninteractive apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends zip
+          rm -rf /var/lib/apt/lists/*
+
+          python -m venv /opt/venv
+          . /opt/venv/bin/activate
+
+          python -m pip install --upgrade pip
+          python -m pip install -r ./requirements.txt
+          python manage.py collectstatic --clear --noinput --settings=config.settings.production
+
+          echo "Waiting for Node build to complete..."
+
+          while [ ! -f "/shared/node-build-done" ]; do
+            sleep 1
+          done
+
+          echo "Node build complete, zipping"
+
+          rm --force web.zip
+          zip -r web.zip . \
+            -x ".git/*" \
+            -x "client/*.json" \
+            -x "client/*.js" \
+            -x "client/*.html" \
+            -x "client/dist/*" \
+            -x "client/src/*" \
+            -x "client/node_modules/*" \
+            -x "*/__pycache__/*" \
+            -x "docker/*" \
+            -x ".dockerignore" \
+            -x ".editorconfig" \
+            -x ".gitignore" \
+            -x ".nvmrc" \
+            -x "requirements.txt" \
+            -x "README.md"
 volumes:
-  production_data:
+  shared:

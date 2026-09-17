@@ -11,6 +11,7 @@ htmlcov/
 !.env.example
 *.sqlite3
 *.sqlite3-*
+web.zip
 staticfiles/
 django-react-starter.tar
 
