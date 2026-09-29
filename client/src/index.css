@@ -10,13 +10,3 @@
 body {
   margin: 0;
 }
-
-main {
-  max-width: 48rem;
-  margin: 4rem auto;
-  padding: 0 1.5rem;
-}
-
-h1 {
-  line-height: 1.2;
-}
