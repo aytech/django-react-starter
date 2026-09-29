@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vitest/config';
 
 const djangoProxyTarget = process.env.DJANGO_PROXY_TARGET || 'http://127.0.0.1:8000';
 
@@ -20,5 +20,10 @@ export default defineConfig(({ command, isPreview }) => ({
       '/admin': djangoProxyTarget,
       '/static/admin': djangoProxyTarget,
     },
+  },
+  test: {
+    environment: 'jsdom',
+    setupFiles: './tests/setup.ts',
+    clearMocks: true,
   },
 }));

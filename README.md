@@ -109,11 +109,16 @@ django-react-starter/
     ├── urls.py
     ├── views.py
     ├── tests.py
+    ├── test_frontend_integration.py
     ├── package.json
     ├── package-lock.json
     ├── tsconfig.json
     ├── vite.config.js
     ├── index.html
+    ├── tests/
+    │   ├── setup.ts
+    │   ├── App.test.tsx
+    │   └── main.test.tsx
     ├── src/
     │   ├── main.tsx
     │   ├── index.css             # global styles only
@@ -137,6 +142,7 @@ With the virtual environment activated:
 python manage.py check
 python manage.py test --settings=config.settings.testing
 python manage.py makemigrations --check --dry-run
+npm --prefix client test
 npm --prefix client run typecheck
 npm --prefix client run build
 ```
