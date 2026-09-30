@@ -48,6 +48,72 @@ class ClientRoutingTests(SimpleTestCase):
             with self.subTest(path=path):
                 self.assertEqual(self.client.get(path).status_code, 404)
 
+    def test_api_auth_is_not_exposed_when_debug_is_disabled(self):
+        self.assertFalse(settings.DEBUG)
+        self.assertEqual(self.client.get("/api-auth/login/").status_code, 404)
+
+
+class DevelopmentSettingsTests(SimpleTestCase):
+    def run_with_development_settings(self, code):
+        environment = os.environ.copy()
+        environment["DJANGO_SETTINGS_MODULE"] = "config.settings.development"
+
+        return subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                code,
+            ],
+            cwd=settings.BASE_DIR,
+            env=environment,
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+
+    def test_defaults_are_explicitly_development_only(self):
+        result = self.run_with_development_settings(
+            """
+import json
+from config.settings import development
+
+names = ("DEBUG", "SECRET_KEY", "ALLOWED_HOSTS")
+print(json.dumps({name: getattr(development, name) for name in names}))
+"""
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        development = json.loads(result.stdout)
+        self.assertTrue(development["DEBUG"])
+        self.assertEqual(
+            development["SECRET_KEY"],
+            "django-insecure-local-development-only-do-not-use-in-production",
+        )
+        self.assertEqual(
+            development["ALLOWED_HOSTS"],
+            ["localhost", "127.0.0.1", "[::1]"],
+        )
+
+    def test_api_auth_route_is_enabled_for_development(self):
+        result = self.run_with_development_settings(
+            """
+import django
+import json
+
+django.setup()
+
+from django.urls import resolve
+
+match = resolve("/api-auth/login/")
+print(json.dumps({"view_name": match.view_name}))
+"""
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        route = json.loads(result.stdout)
+        self.assertEqual(route["view_name"], "rest_framework:login")
+
 
 class ProductionSettingsTests(SimpleTestCase):
     def import_production_settings(self, **overrides):

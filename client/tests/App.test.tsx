@@ -1,4 +1,10 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useExampleText } from '../src/lib/hooks/useExample';
@@ -82,6 +88,18 @@ describe('App', () => {
     expect(screen.getByText('Cached title')).toBeInTheDocument();
   });
 
+  it('shows a loading notification for a background fetch', () => {
+    setQueryResult({
+      isFetching: true,
+    });
+
+    render(<App />);
+
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Loading data from API...',
+    );
+  });
+
   it('shows an API error notification', async () => {
     setQueryResult({
       error: new Error('API unavailable'),
@@ -93,5 +111,37 @@ describe('App', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'API unavailable',
     );
+  });
+
+  it('dismisses the API error from the Alert close button', async () => {
+    setQueryResult({
+      error: new Error('API unavailable'),
+      isError: true,
+    });
+
+    render(<App />);
+
+    await screen.findByRole('alert');
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+  });
+
+  it('dismisses the API error when the Snackbar receives Escape', async () => {
+    setQueryResult({
+      error: new Error('API unavailable'),
+      isError: true,
+    });
+
+    render(<App />);
+
+    await screen.findByRole('alert');
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    await waitFor(() => {
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
   });
 });

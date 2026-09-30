@@ -155,6 +155,16 @@ npm --prefix client run build
 The Django HTML report is written to `htmlcov/`; the React report is written to
 `client/coverage/`.
 
+## To generate coverage:
+```sh
+python -m pip install -r requirements-dev.txt
+
+python -m coverage erase
+python -m coverage run manage.py test --settings=config.settings.testing
+python -m coverage report
+python -m coverage html
+```
+
 ## Build and deployment
 
 `./build.sh` installs frontend dependencies from the lockfile, builds React, and
