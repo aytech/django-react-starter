@@ -18,7 +18,7 @@ services:
       - sh
       - -ec
       - |
-        python -m pip install --disable-pip-version-check -r requirements.txt
+        python -m pip install --disable-pip-version-check -r requirements-dev.txt
         python manage.py migrate --noinput
         exec python manage.py runserver 0.0.0.0:8000
     ports:

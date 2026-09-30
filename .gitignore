@@ -5,6 +5,7 @@
 __pycache__/
 *.py[cod]
 .coverage
+.coverage.*
 htmlcov/
 
 # Local settings and data
@@ -20,6 +21,7 @@ django-react-starter.tar
 # Frontend
 client/node_modules/
 client/dist/
+client/coverage/
 *.log
 
 # Editors and OS

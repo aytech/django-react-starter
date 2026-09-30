@@ -25,7 +25,7 @@ From this directory:
 ```sh
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
 npm --prefix client ci
 npm --prefix client run build
 python manage.py migrate
@@ -85,6 +85,7 @@ the proxied backend routes.
 django-react-starter/
 ├── manage.py
 ├── requirements.txt
+├── requirements-dev.txt
 ├── build.sh
 ├── docker/
 │   ├── Dockerfile
@@ -113,7 +114,7 @@ django-react-starter/
     ├── package.json
     ├── package-lock.json
     ├── tsconfig.json
-    ├── vite.config.js
+    ├── vite.config.ts
     ├── index.html
     ├── tests/
     │   ├── setup.ts
@@ -141,11 +142,18 @@ With the virtual environment activated:
 ```sh
 python manage.py check
 python manage.py test --settings=config.settings.testing
+coverage run manage.py test --settings=config.settings.testing
+coverage report
+coverage html
 python manage.py makemigrations --check --dry-run
 npm --prefix client test
+npm --prefix client run test:coverage
 npm --prefix client run typecheck
 npm --prefix client run build
 ```
+
+The Django HTML report is written to `htmlcov/`; the React report is written to
+`client/coverage/`.
 
 ## Build and deployment
 
