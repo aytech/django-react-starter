@@ -1,14 +1,10 @@
 import { getJson } from './httpClient'
 
 export interface Example {
-  id: number
-  text: string
+  name: string
+  title: string
 }
 
-interface ExampleResponse {
-  text: Example
-}
-
-export function fetchExample(signal?: AbortSignal): Promise<ExampleResponse> {
+export function fetchExample(signal?: AbortSignal): Promise<Example> {
   return getJson('/api/v1/example/', { signal })
 }

@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 
 export default function App() {
 
-  const [apiErrorMessage, setApiErrorMessage] = useState<String>("")
+  const [apiErrorMessage, setApiErrorMessage] = useState<string>("")
   const [apiError, setApiError] = useState(false)
   const { data, error, isPending, isFetching, isRefetching, isError, refetch } = useExampleText()
 
@@ -29,12 +29,16 @@ export default function App() {
     <>
       <CssBaseline />
       <Container component="main" maxWidth="md" className="app">
-        <Typography component="h1" variant="h4" gutterBottom>
-          Django + React
-        </Typography>
-        <Typography>Your starter is ready.</Typography>
+        {data && (
+          <>
+            <Typography component="h1" variant="h4" gutterBottom>
+              {data.name}
+            </Typography>
+            <Typography>{data.title}</Typography>
+          </>
+        )}
         <Snackbar
-          open={isPending}
+          open={isFetching}
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'center',
