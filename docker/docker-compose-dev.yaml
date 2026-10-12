@@ -22,7 +22,7 @@ services:
         python manage.py migrate --noinput
         exec python manage.py runserver 0.0.0.0:8000
     ports:
-      - "127.0.0.1:8000:8000"
+      - "8000:8000"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/admin/login/', timeout=2).close()"]
       interval: 5s
@@ -31,7 +31,7 @@ services:
       retries: 20
 
   ui:
-    image: ${NODE_IMAGE:-node:22-slim}
+    image: ${NODE_IMAGE:-node:24-bookworm-slim}
     init: true
     working_dir: /app/client
     environment:
@@ -51,7 +51,7 @@ services:
         npm ci --prefer-offline --no-audit --no-fund
         exec npm run dev -- --host 0.0.0.0 --port 5173
     ports:
-      - "127.0.0.1:5173:5173"
+      - "5173:5173"
 
 volumes:
   dev_data:

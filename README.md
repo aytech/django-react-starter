@@ -11,9 +11,9 @@ For container development with hot reload and production image builds, see
 ## Requirements
 
 - Python 3.12–3.14
-- Node.js 22.12+ and npm (Node 22 is selected by `.nvmrc`)
+- Node.js 24.15+ and npm (Node 24 is selected by `.nvmrc`)
 
-Versions selected on September 14, 2026: Django 6.1.1, React 19.3.0, and Vite 8.3.0.
+Versions selected on October 12, 2026: Django 6.1.1, React 19.3.0, and Vite 8.3.4.
 See the [Django releases](https://www.djangoproject.com/download/),
 [React versions](https://react.dev/versions), and
 [Vite releases](https://vite.dev/releases).
